@@ -51,7 +51,7 @@ That way, now `UserService` can be used as a service for `models.User` model.
 
 ### Default params for `Service`
 
-Some models may need represent a implicit relation. By example, a item is only allowed be fetch by its owner (That's could be a situation to attend a scope). So, it's possible to define a default param for `Service` class.
+Some models may need represent a implicit relation. By example, a item is only allowed be fetch by its owner (That's could be a situation to attend a [scope][fastapi-oauth2-scopes]). So, it's possible to define a default param for `Service` class.
 
 ```python
 # by fixing some `id` as default param
@@ -81,3 +81,4 @@ Even methods that update or delete the models will use the default param indirec
 
 
 [fastapi-tutorial]: https://fastapi.tiangolo.com/tutorial/
+[fastapi-oauth2-scopes]: https://fastapi.tiangolo.com/advanced/security/oauth2-scopes/
