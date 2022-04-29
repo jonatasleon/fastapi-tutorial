@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Union
 
-from fastapi import HTTPException, status, Depends
-from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt
 from passlib.context import CryptContext
 
