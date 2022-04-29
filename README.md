@@ -14,7 +14,7 @@ Project aimed to follow and learn from [FastAPI Tutorial][fastapi-tutorial].
 │  ├── routers/         # Sub-routers definition
 │  ├── schemas/         # Schemas definition
 │  └── services/        # Service pattern implementation
-├── README.md
+├── README.md           # This file
 └── requirements.txt    # Library dependencies
 ```
 
@@ -38,7 +38,7 @@ The derived class must define the target model via typing.
 
 ```python
 # once service class is defined as below
-class Service(Generic[MT, ST]):
+class Service(Generic[MT, ST]): # MT: model type, ST: schema type
     ...
 
 # so that the service class can be used as below
@@ -61,12 +61,23 @@ class ItemService(Service[models.Item, schemas.Item]):
 # or injecting the value at runtime
 class ItemService(Service[models.Item, schemas.Item]):
     def __init__(self, owner_id: int):
-        self._default_params['owner_id'] = owner_id
+        self.update_default_params({'owner_id': owner_id})
 ```
 
-> Note that when the `__init__` method is called, the attribute `_default_params` must be updated.
+Note that when the `__init__` method is called, the `update_default_params` method must be called instead of set a new dict to `__default_params__`, otherwise the modification will not be applied.
 
-Once a default param is defined, every method envolving model creation or querying will inject the default param. Even methods that update or delete the models will use the default param indirectly.
+To use the default params, the `default_params` attribute could be used.
+
+```python
+# by using the default params
+class ItemService(Service[models.Item, schemas.Item]):
+    # skipped snippet
+    def get_item_on_my_way(self):
+        return self.query.filter_by(**self.default_params).first()
+```
+
+Once a default param is defined, every method envolving model creation or querying will inject the default param.
+Even methods that update or delete the models will use the default param indirectly once them use `create_model` or `filter_by` methods.
 
 
 [fastapi-tutorial]: https://fastapi.tiangolo.com/tutorial/
