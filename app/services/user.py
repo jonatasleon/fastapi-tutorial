@@ -1,15 +1,20 @@
+"""User services."""
 from app import models, schemas
 
 from .base import Service
 
 
 class EmailAlreadyRegistredError(Exception):
+    """Raised when trying to create a user with an email already registred."""
+
     def __init__(self, email: str):
         self.email = email
         super().__init__(f"User with email {email} already exists.")
 
 
 class UserService(Service[models.User, schemas.UserBase]):
+    """User base service."""
+
     def get_by_email(self, email: str) -> schemas.User:
         """Get a user by email.
         :param email: the email to get the user by

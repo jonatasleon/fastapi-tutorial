@@ -1,3 +1,4 @@
+"""Authentication module"""
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Union
 
@@ -37,20 +38,21 @@ class CredentialsException(HTTPException):
 
 
 def get_current_user(token: str = Depends(oauth2_scheme), service: UserService = None):
+    """Get the current user given an access token."""
     try:
         token_data = decode_access_token(token)
-    except InvalidTokenError:
+    except InvalidTokenError as e:
         raise CredentialsException(
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from e
     try:
         user = service.get_by_email(token_data.email)
-    except NotFoundError:
+    except NotFoundError as e:
         raise CredentialsException(
             detail="Could not find user by email",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from e
 
     return user
 
@@ -80,8 +82,8 @@ def decode_access_token(token: str) -> TokenData:
     payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     try:
         email: str = payload["sub"]
-    except KeyError:
-        raise InvalidTokenError(token)
+    except KeyError as e:
+        raise InvalidTokenError(token) from e
     return TokenData(email=email)
 
 

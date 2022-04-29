@@ -1,5 +1,5 @@
-from typing import (AnyStr, Dict, Generator, Generic, Type, TypeVar, Union,
-                    get_args)
+"""Services base"""
+from typing import AnyStr, Dict, Generator, Generic, Type, TypeVar, Union, get_args
 
 from pydantic import BaseModel
 from sqlalchemy.orm import Query, Session
@@ -11,7 +11,7 @@ ST = TypeVar("ST", bound=BaseModel)
 
 
 class NotFoundError(Exception):
-    """Raised when a model with a given id is not found.
+    """Raised when a model with a given params are not found.
 
     Example:
         >>> raise NotFoundError(models.User, {"id": 1})
@@ -48,11 +48,14 @@ class Service(Generic[MT, ST]):
         :param db: the database session
         """
         self.db: Session = db
-        self.model: Type[MT] = get_args(self.__orig_bases__[0])[0]
+        types = get_args(self.__orig_bases__[0])  # pylint: disable=no-member
+        self.model: Type[MT] = types[0]
         self.query = self.db.query(self.model)
         self._default_params = self.__default_params__.copy()
 
-    def update_default_params(self, **kwargs: Dict[str, Union[AnyStr, int, float, bool]]) -> None:
+    def update_default_params(
+        self, **kwargs: Dict[str, Union[AnyStr, int, float, bool]]
+    ) -> None:
         """Update the default parameters.
         :param kwargs: keyword arguments to update the default parameters with
         """
@@ -60,6 +63,7 @@ class Service(Generic[MT, ST]):
 
     @property
     def default_params(self) -> Dict[str, Union[AnyStr, int, float, bool]]:
+        """Get the default parameters."""
         return self._default_params.copy()
 
     def create_model(self, **kwargs) -> MT:
@@ -98,19 +102,20 @@ class Service(Generic[MT, ST]):
 
         :param kwargs: keyword arguments to filter the query by
         :raises NotFoundError: if no model matches the keyword arguments
-        :return: the first model that matches the keyword arguments or raise a NotFoundError if no model matches
+        :return: the first model that matches the keyword
+                 arguments or raise a NotFoundError if no model matches
         """
         model = self.get_one(**kwargs)
         if model is None:
             raise NotFoundError(self.model, kwargs)
         return model
 
-    def get_by_id(self, id: int) -> ST:
+    def get_by_id(self, id_: int) -> ST:
         """Get a model by its id.
-        :param id: the id of the model to get
-        :return: the model with the given id
+        :param id_: the id of the model to get
+        :return: the model with the given id_
         """
-        return self.get_one_or_raise(id=id)
+        return self.get_one_or_raise(id=id_)
 
     def get_all(self) -> Generator[ST, None, None]:
         """Get all models.
@@ -132,22 +137,22 @@ class Service(Generic[MT, ST]):
         """
         return self.filter_by(**kwargs).count()
 
-    def delete(self, id: int) -> None:
+    def delete(self, id_: int) -> None:
         """Delete a model by its id.
-        :param id: the id of the model to delete
+        :param id_: the id of the model to delete
         :param kwargs: keyword arguments to filter the query by
         """
-        model = self.get_by_id(id)
+        model = self.get_by_id(id_)
         self.db.delete(model)
         self.db.commit()
 
-    def update(self, id: int, model: ST) -> ST:
+    def update(self, id_: int, model: ST) -> ST:
         """Update a model by its id.
-        :param id: the id of the model to update
+        :param id_: the id of the model to update
         :param model: the model to update
         :return: the updated model
         """
-        model = self.get_by_id(id)
+        model = self.get_by_id(id_)
         for key, value in model.dict(exclude_unset=True).items():
             setattr(model, key, value)
         self.db.commit()

@@ -1,3 +1,4 @@
+"""Database module."""
 from typing import Generator
 
 from sqlalchemy import create_engine
@@ -15,6 +16,11 @@ Base = declarative_base()
 
 
 def get_db() -> Generator[Session, None, None]:
+    """Instantiate and return a new Session object.
+    Works as a context manager.
+
+    :return: a new Session object
+    """
     db = SessionLocal()
     try:
         yield db

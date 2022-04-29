@@ -1,3 +1,4 @@
+"""Schemas for the app."""
 from .commom import Detail, Token, TokenData
 from .item import Item, ItemBase, ItemCreate, ItemUpdate
 from .user import User, UserBase, UserCreate, UserShow

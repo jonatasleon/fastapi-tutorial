@@ -1,5 +1,4 @@
-from operator import mod
-
+"""Item services."""
 from sqlalchemy.orm import Session
 
 from .. import models, schemas
@@ -23,4 +22,4 @@ class OwnedItemService(ItemService):
         """Initialize the service."""
         super().__init__(db)
         self.owner = owner
-        self.update_default_params({'owner_id': owner.id})
+        self.update_default_params(owner_id=owner.id)

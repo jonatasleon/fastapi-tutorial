@@ -1,3 +1,4 @@
+"""Items router."""
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -22,6 +23,7 @@ def get_service(
 
 @router.get("", response_model=List[schemas.Item])
 async def read_items(service: ItemService = Depends(get_service)):
+    """Get all items."""
     return service.get_all()
 
 
@@ -30,6 +32,7 @@ async def create_item(
     item: schemas.ItemCreate,
     service: ItemService = Depends(get_service),
 ):
+    """Create an item."""
     return service.save(item)
 
 
@@ -39,10 +42,11 @@ async def update_item(
     item: schemas.ItemUpdate,
     service: ItemService = Depends(get_service),
 ):
+    """Update an item."""
     try:
         return service.update(item_id, item)
     except NotFoundError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
 @router.get("/{item_id}", response_model=schemas.Item)
@@ -50,13 +54,14 @@ async def read_item(
     item_id: int,
     service: ItemService = Depends(get_service),
 ):
+    """Get an item by id."""
     try:
         return service.get_one(item_id)
     except NotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Item with id {e.id} not found",
-        )
+        ) from e
 
 
 @router.delete(
@@ -70,10 +75,11 @@ async def delete_item(
     item_id: int,
     service: ItemService = Depends(get_service),
 ):
+    """Delete an item by id."""
     try:
         service.delete(item_id)
     except NotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Item with id {e.id} not found",
-        )
+        ) from e

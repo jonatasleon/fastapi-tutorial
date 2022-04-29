@@ -1,0 +1,3 @@
+[MASTER]
+extension-pkg-whitelist = pydantic
+good-names = _, db, id, e

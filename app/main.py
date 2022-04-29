@@ -1,3 +1,4 @@
+"""Main module."""
 from fastapi import FastAPI
 
 from .routers import auth_router, items_router, users_router

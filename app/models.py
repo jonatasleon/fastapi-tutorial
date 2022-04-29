@@ -1,12 +1,13 @@
-from typing import Sequence
-
+"""Models."""
 from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .database import Base
 
 
-class User(Base):  # type: ignore
+class User(Base):  # pylint: disable=too-few-public-methods
+    """User model."""
+
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -18,7 +19,9 @@ class User(Base):  # type: ignore
     items = relationship("Item", back_populates="owner")
 
 
-class Item(Base):  # type: ignore
+class Item(Base):  # pylint: disable=too-few-public-methods
+    """Item model."""
+
     __tablename__ = "items"
 
     id = Column(Integer, primary_key=True, index=True)
