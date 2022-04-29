@@ -1,4 +1,5 @@
-from typing import Generator, Generic, Type, TypeVar, Union, get_args
+from typing import (AnyStr, Dict, Generator, Generic, Type, TypeVar, Union,
+                    get_args)
 
 from fastapi import Depends
 from pydantic import BaseModel
@@ -41,7 +42,7 @@ class Service(Generic[MT, ST]):
     :attr __default_params__: the default parameters when creating model or filtering the query
     """
 
-    __default_params__ = {}
+    __default_params__: Dict[str, Union[AnyStr, int, float, bool]] = {}
 
     def __init__(self, db: Session = Depends(get_db)):
         """Initialize the service.
@@ -52,19 +53,29 @@ class Service(Generic[MT, ST]):
         self.query = self.db.query(self.model)
         self._default_params = self.__default_params__.copy()
 
+    def update_default_params(self, **kwargs: Dict[str, Union[AnyStr, int, float, bool]]) -> None:
+        """Update the default parameters.
+        :param kwargs: keyword arguments to update the default parameters with
+        """
+        self._default_params.update(kwargs)
+
+    @property
+    def default_params(self) -> Dict[str, Union[AnyStr, int, float, bool]]:
+        return self._default_params.copy()
+
     def create_model(self, **kwargs) -> MT:
         """Create a new model instance.
         :param kwargs: keyword arguments to create the model with
         :return: the created model
         """
-        return self.model(**kwargs, **self._default_params)
+        return self.model(**kwargs, **self.default_params)
 
     def filter_by(self, **kwargs) -> Query:
         """Filter the query by the given keyword arguments.
         :param kwargs: keyword arguments to filter the query by
         :return: the filtered query
         """
-        return self.query.filter_by(**kwargs, **self._default_params)
+        return self.query.filter_by(**kwargs, **self.default_params)
 
     def save(self, schema: ST) -> ST:
         """Save the given schema.

@@ -23,4 +23,4 @@ class ScopedItemService(ItemService):
         """Initialize the service."""
         super().__init__(db)
         self.owner = owner
-        self._default_params["owner_id"] = self.owner.id
+        self.update_default_params({'owner_id': owner.id})
