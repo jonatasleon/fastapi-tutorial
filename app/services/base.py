@@ -1,11 +1,10 @@
 from typing import (AnyStr, Dict, Generator, Generic, Type, TypeVar, Union,
                     get_args)
 
-from fastapi import Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Query, Session
 
-from ..database import Base, get_db
+from ..database import Base
 
 MT = TypeVar("MT", bound=Base)
 ST = TypeVar("ST", bound=BaseModel)
@@ -44,7 +43,7 @@ class Service(Generic[MT, ST]):
 
     __default_params__: Dict[str, Union[AnyStr, int, float, bool]] = {}
 
-    def __init__(self, db: Session = Depends(get_db)):
+    def __init__(self, db: Session):
         """Initialize the service.
         :param db: the database session
         """
