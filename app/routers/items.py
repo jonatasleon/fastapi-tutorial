@@ -7,7 +7,7 @@ from .. import schemas
 from ..auth import get_current_user
 from ..database import get_db
 from ..services import NotFoundError
-from ..services import ScopedItemService as ItemService
+from ..services import OwnedItemService as ItemService
 
 router = APIRouter(prefix="/items", tags=["items"])
 
@@ -16,7 +16,7 @@ def get_service(
     db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user),
 ):
-    """Get :class:`ItemService` service for the current user."""
+    """Get :class:`OwnedItemService` service for the current user."""
     return ItemService(db, current_user)
 
 

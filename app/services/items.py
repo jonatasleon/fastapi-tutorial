@@ -11,7 +11,7 @@ class ItemService(Service[models.Item, schemas.ItemBase]):
     This class is responsible for CRUD operations on :class:`app.models.Item`."""
 
 
-class ScopedItemService(ItemService):
+class OwnedItemService(ItemService):
     """Scoped Item Service that inherits from :class:`app.services.ItemService`
     abstract class. It apply a scope to the items that can be
     retrieved or created by the current user.
