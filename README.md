@@ -83,7 +83,7 @@ Even methods that update or delete the models will use the default param indirec
 
 Some implementation goals:
 - [ ] Use a [config pattern][fastapi-config] to define the database connection and other settings.
-- [ ] Implement a [scoped session][fastapi-oauth2-scope] pattern.
+- [ ] Implement a [scoped session][fastapi-oauth2-scopes] pattern.
 - [ ] Implement some [background tasks][fastapi-background-tasks].
 - [ ] Integrate with some queue system (like [Celery][fastapi-celery]).
 
