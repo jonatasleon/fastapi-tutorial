@@ -28,20 +28,13 @@ async def read_items(service: ItemService = Depends(get_service)):
 
 
 @router.post("", response_model=schemas.Item, status_code=status.HTTP_201_CREATED)
-async def create_item(
-    item: schemas.ItemCreate,
-    service: ItemService = Depends(get_service),
-):
+async def create_item(item: schemas.ItemCreate, service: ItemService = Depends(get_owned_item_service)):
     """Create an item."""
     return service.save(item)
 
 
 @router.put("/{item_id}", response_model=schemas.Item)
-async def update_item(
-    item_id: int,
-    item: schemas.ItemUpdate,
-    service: ItemService = Depends(get_service),
-):
+async def update_item(item_id: int, item: schemas.ItemUpdate, service: ItemService = Depends(get_owned_item_service)):
     """Update an item."""
     try:
         return service.update(item_id, item)
@@ -50,10 +43,7 @@ async def update_item(
 
 
 @router.get("/{item_id}", response_model=schemas.Item)
-async def read_item(
-    item_id: int,
-    service: ItemService = Depends(get_service),
-):
+async def read_item(item_id: int, service: ItemService = Depends(get_owned_item_service)):
     """Get an item by id."""
     try:
         return service.get_one(item_id)
@@ -65,16 +55,9 @@ async def read_item(
 
 
 @router.delete(
-    "/{item_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-    responses={
-        status.HTTP_404_NOT_FOUND: {"model": schemas.Detail},
-    },
+    "/{item_id}", status_code=status.HTTP_204_NO_CONTENT, responses={status.HTTP_404_NOT_FOUND: {"model": schemas.Detail}}
 )
-async def delete_item(
-    item_id: int,
-    service: ItemService = Depends(get_service),
-):
+async def delete_item(item_id: int, service: ItemService = Depends(get_owned_item_service)):
     """Delete an item by id."""
     try:
         service.delete(item_id)

@@ -1,6 +1,15 @@
 """Services base"""
-from typing import (AnyStr, Callable, Dict, Generator, Generic, Type, TypeVar,
-                    Union, get_args)
+from typing import (
+    AnyStr,
+    Callable,
+    Dict,
+    Generator,
+    Generic,
+    Type,
+    TypeVar,
+    Union,
+    get_args,
+)
 
 from pydantic import BaseModel
 from sqlalchemy.orm import Query, Session
