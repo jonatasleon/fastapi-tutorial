@@ -28,7 +28,9 @@ def get_current_user(
     return get_current_user_(token, user_service)
 
 
-def get_owned_item_service(db: Session = Depends(get_db), owner: schemas.User = Depends(get_current_user)):
+def get_owned_item_service(
+    db: Session = Depends(get_db), owner: schemas.User = Depends(get_current_user)
+):
     """Wrapper creates a new instance of OwnedItemService."""
     return OwnedItemService(db, owner)
 
