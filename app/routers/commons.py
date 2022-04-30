@@ -1,11 +1,12 @@
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
-
-from app.database import get_db
 from app import schemas
+from app.auth import Auth
+from app.auth import get_current_user as get_current_user_
+from app.auth import oauth2_scheme
+from app.database import get_db
 from app.services import UserService
-from app.auth import Auth, get_current_user as get_current_user_, oauth2_scheme
 from app.services.items import ItemService, OwnedItemService
 
 

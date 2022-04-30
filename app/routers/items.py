@@ -4,11 +4,11 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from .commons import get_current_user, get_owned_item_service
 from .. import schemas
 from ..database import get_db
 from ..services import NotFoundError
 from ..services import OwnedItemService as ItemService
+from .commons import get_current_user, get_owned_item_service
 
 router = APIRouter(prefix="/items", tags=["items"])
 
