@@ -79,6 +79,16 @@ class ItemService(Service[models.Item, schemas.Item]):
 Once a default param is defined, every method envolving model creation or querying will inject the default param.
 Even methods that update or delete the models will use the default param indirectly once them use `create_model` or `filter_by` methods.
 
+## TODO
 
-[fastapi-tutorial]: https://fastapi.tiangolo.com/tutorial/
+Some implementation goals:
+- [ ] Use a [config pattern][fastapi-config] to define the database connection and other settings.
+- [ ] Implement a [scoped session][fastapi-oauth2-scope] pattern.
+- [ ] Implement some [background tasks][fastapi-background-tasks].
+- [ ] Integrate with some queue system (like [Celery][fastapi-celery]).
+
+[fastapi-background-tasks]: https://fastapi.tiangolo.com/advanced/background-tasks/
+[fastapi-celery]: https://fastapi.tiangolo.com/tutorial/background-tasks/?h=celery#caveat
+[fastapi-config]: https://fastapi.tiangolo.com/advanced/settings/#the-config-file
 [fastapi-oauth2-scopes]: https://fastapi.tiangolo.com/advanced/security/oauth2-scopes/
+[fastapi-tutorial]: https://fastapi.tiangolo.com/tutorial/
