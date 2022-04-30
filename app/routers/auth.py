@@ -5,6 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from .. import schemas
 from ..auth import Auth, CredentialsException, create_access_token
 from ..services import EmailAlreadyRegistredError
+from .commons import get_auth
 
 router = APIRouter(tags=["auth"])
 

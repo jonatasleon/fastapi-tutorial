@@ -4,8 +4,8 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from .commons import get_current_user, get_owned_item_service
 from .. import schemas
-from ..auth import get_current_user
 from ..database import get_db
 from ..services import NotFoundError
 from ..services import OwnedItemService as ItemService
@@ -13,17 +13,10 @@ from ..services import OwnedItemService as ItemService
 router = APIRouter(prefix="/items", tags=["items"])
 
 
-def get_service(
-    db: Session = Depends(get_db),
-    current_user: schemas.User = Depends(get_current_user),
-):
-    """Get :class:`OwnedItemService` service for the current user."""
-    return ItemService(db, current_user)
-
-
 @router.get("", response_model=List[schemas.Item])
-async def read_items(service: ItemService = Depends(get_service)):
+async def read_items(db: Session = Depends(get_db), owner: schemas.User = Depends(get_current_user)):
     """Get all items."""
+    service = ItemService(db, owner)
     return service.get_all()
 
 
@@ -46,7 +39,7 @@ async def update_item(item_id: int, item: schemas.ItemUpdate, service: ItemServi
 async def read_item(item_id: int, service: ItemService = Depends(get_owned_item_service)):
     """Get an item by id."""
     try:
-        return service.get_one(item_id)
+        return service.get_by_id(item_id)
     except NotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
