@@ -2,12 +2,11 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Union
 
-from fastapi import Depends, HTTPException, status
+from fastapi import HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt
 from passlib.context import CryptContext
 
-from .database import get_db
 from .schemas import Token, TokenData, User, UserCreate
 from .services import (
     EmailAlreadyRegistredError,
@@ -42,7 +41,7 @@ class CredentialsException(HTTPException):
         super().__init__(status_code=status_code, detail=detail, headers=headers)
 
 
-def get_current_user(token: str = Depends(oauth2_scheme), service: UserService = None):
+def get_current_user(token: str, service: UserService):
     """Get the current user given an access token."""
     try:
         token_data = decode_access_token(token)
