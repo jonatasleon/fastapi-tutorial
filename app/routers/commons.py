@@ -1,3 +1,4 @@
+"""Commons function used by routers."""
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
