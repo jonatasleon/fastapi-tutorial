@@ -1,5 +1,6 @@
 """Services base"""
-from typing import AnyStr, Dict, Generator, Generic, Type, TypeVar, Union, get_args
+from typing import (AnyStr, Dict, Generator, Generic, Type, TypeVar, Union,
+                    get_args)
 
 from pydantic import BaseModel
 from sqlalchemy.orm import Query, Session
@@ -53,9 +54,7 @@ class Service(Generic[MT, ST]):
         self.query = self.db.query(self.model)
         self._default_params = self.__default_params__.copy()
 
-    def update_default_params(
-        self, **kwargs: Dict[str, Union[AnyStr, int, float, bool]]
-    ) -> None:
+    def update_default_params(self, **kwargs: Dict[str, Union[AnyStr, int, float, bool]]) -> None:
         """Update the default parameters.
         :param kwargs: keyword arguments to update the default parameters with
         """
