@@ -1,6 +1,6 @@
 """Services base"""
-from typing import (AnyStr, Dict, Generator, Generic, Type, TypeVar, Union,
-                    get_args)
+from typing import (AnyStr, Callable, Dict, Generator, Generic, Type, TypeVar,
+                    Union, get_args)
 
 from pydantic import BaseModel
 from sqlalchemy.orm import Query, Session
@@ -157,3 +157,18 @@ class Service(Generic[MT, ST]):
         self.db.commit()
         self.db.refresh(model)
         return model
+
+
+def get_service(service_class: Type[Service], db: Session, *args, **kwargs) -> Callable[[], Service]:
+    """Wrap a service class in a function that returns a new instance of the service.
+
+    :param service_class: the service class that will be wrapped
+    :param args: the arguments to pass to the service class constructor
+    :param kwargs: the keyword arguments to pass to the service class constructor
+    :return: a function that returns a new instance of the service class
+    """
+
+    def inner() -> Service:
+        return service_class(db=db, *args, **kwargs)
+
+    return inner
