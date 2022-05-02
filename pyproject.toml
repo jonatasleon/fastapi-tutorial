@@ -1,3 +1,29 @@
+[tool.poetry]
+name = "fastapi-tutorial"
+version = "0.1.0"
+description = ""
+authors = ["Jonatas Leon <j@jonatasleon.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+fastapi = "^0.75.2"
+SQLAlchemy = "^1.4.36"
+uvicorn = "^0.17.6"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+python-multipart = "^0.0.5"
+
+[tool.poetry.dev-dependencies]
+black = "^22.3.0"
+pylint = "^2.13.7"
+isort = "^5.10.1"
+flake8 = "^4.0.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.black]
 line-length = 100
 target-version = ['py37']
