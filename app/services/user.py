@@ -12,8 +12,10 @@ class EmailAlreadyRegistredError(Exception):
         super().__init__(f"User with email {email} already exists.")
 
 
-class UserService(Service[models.User, schemas.UserBase]):
+class UserService(Service[models.User]):
     """User base service."""
+
+    __model__ = models.User
 
     def get_by_email(self, email: str) -> schemas.User:
         """Get a user by email.

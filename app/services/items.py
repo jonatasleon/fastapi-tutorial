@@ -1,13 +1,15 @@
 """Item services."""
 from sqlalchemy.orm import Session
 
-from .. import models, schemas
+from .. import models
 from .base import Service
 
 
-class ItemService(Service[models.Item, schemas.ItemBase]):
+class ItemService(Service[models.Item]):
     """Item Service that inherits from :class:`Service` abstract class.
     This class is responsible for CRUD operations on :class:`app.models.Item`."""
+
+    __model__ = models.Item
 
 
 class OwnedItemService(ItemService):
