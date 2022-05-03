@@ -79,9 +79,9 @@ class Service(Generic[MT]):
         return self.query.filter_by(**{**self.default_params, **kwargs})
 
     def save(self, model: MT) -> MT:
-        """Save the given schema.
-        :param schema: the schema to save
-        :return: the saved schema
+        """Save the given model.
+        :param model: the model to save
+        :return: the saved model
         """
         self.db.add(model)
         self.db.commit()
