@@ -1,13 +1,11 @@
 """Services base"""
-from typing import AnyStr, Dict, Generator, Generic, Type, TypeVar, Union, get_args
+from typing import AnyStr, Dict, Generator, Generic, Type, TypeVar, Union
 
-from pydantic import BaseModel
 from sqlalchemy.orm import Query, Session
 
 from ..database import Base
 
 MT = TypeVar("MT", bound=Base)
-ST = TypeVar("ST", bound=BaseModel)
 
 
 class NotFoundError(Exception):
@@ -15,6 +13,9 @@ class NotFoundError(Exception):
 
     Example:
         >>> raise NotFoundError(models.User, {"id": 1})
+
+    :param model: The model class
+    :param params: The params used to find the model
     """
 
     def __init__(self, model: Type[MT], params: dict):
@@ -24,10 +25,9 @@ class NotFoundError(Exception):
         super().__init__(f"{model.__name__} not found with params: {params}")
 
 
-class Service(Generic[MT, ST]):
+class Service(Generic[MT]):
     """Abstract Service class that provides CRUD operations for a SQLAlchemy model.
     Where typing MT is the SQLAlchemy model
-    and ST is the Pydantic model(ST stands to Schema Type).
 
     Example:
     ```python
@@ -35,23 +35,23 @@ class Service(Generic[MT, ST]):
         ...
     ```
 
-    :attr db: the database session
-    :attr model: the SQLAlchemy model
-    :attr query: the query for the model
-    :attr __default_params__: the default parameters when creating model or filtering the query
+    :param db: the database session
+    :param default_params: the default parameters to use when creating a model
     """
 
     __default_params__: Dict[str, Union[AnyStr, int, float, bool]] = {}
+    __model__: Type[MT] = None
 
-    def __init__(self, db: Session):
-        """Initialize the service.
-        :param db: the database session
-        """
+    def __init__(
+        self, db: Session, *, default_params: Dict[str, Union[AnyStr, int, float, bool]] = None
+    ):
         self.db: Session = db
-        types = get_args(self.__orig_bases__[0])  # pylint: disable=no-member
-        self.model: Type[MT] = types[0]
+        if not self.__model__:
+            raise NotImplementedError("__model__ attribute must be defined")
+        self.model: Type[MT] = self.__model__
         self.query = self.db.query(self.model)
-        self._default_params = self.__default_params__.copy()
+        self._default_params = (self.__default_params__ or {}).copy()
+        self.update_default_params(**(default_params or {}))
 
     def update_default_params(self, **kwargs: Dict[str, Union[AnyStr, int, float, bool]]) -> None:
         """Update the default parameters.
@@ -69,33 +69,32 @@ class Service(Generic[MT, ST]):
         :param kwargs: keyword arguments to create the model with
         :return: the created model
         """
-        return self.model(**kwargs, **self.default_params)
+        return self.model(**{**self.default_params, **kwargs})
 
     def filter_by(self, **kwargs) -> Query:
         """Filter the query by the given keyword arguments.
         :param kwargs: keyword arguments to filter the query by
         :return: the filtered query
         """
-        return self.query.filter_by(**kwargs, **self.default_params)
+        return self.query.filter_by(**{**self.default_params, **kwargs})
 
-    def save(self, schema: ST) -> ST:
+    def save(self, model: MT) -> MT:
         """Save the given schema.
         :param schema: the schema to save
         :return: the saved schema
         """
-        model = self.create_model(**schema.dict())
         self.db.add(model)
         self.db.commit()
         self.db.refresh(model)
         return model
 
-    def get_one(self, **kwargs) -> Union[ST, None]:
+    def get_one(self, **kwargs) -> Union[MT, None]:
         """Get one model by the given keyword arguments.
         :return: the first model that matches the keyword arguments or None if no model matches
         """
-        return self.filter_by(**kwargs).one()
+        return self.filter_by(**kwargs).one_or_none()
 
-    def get_one_or_raise(self, **kwargs) -> ST:
+    def get_one_or_raise(self, **kwargs) -> MT:
         """Get one model by the given keyword arguments.
 
         :param kwargs: keyword arguments to filter the query by
@@ -108,20 +107,20 @@ class Service(Generic[MT, ST]):
             raise NotFoundError(self.model, kwargs)
         return model
 
-    def get_by_id(self, id_: int) -> ST:
+    def get_by_id(self, id_: int) -> MT:
         """Get a model by its id.
         :param id_: the id of the model to get
         :return: the model with the given id_
         """
         return self.get_one_or_raise(id=id_)
 
-    def get_all(self) -> Generator[ST, None, None]:
+    def get_all(self) -> Generator[MT, None, None]:
         """Get all models.
         :return: a generator of all models
         """
         yield from self.find()
 
-    def find(self, **kwargs) -> Generator[ST, None, None]:
+    def find(self, **kwargs) -> Generator[MT, None, None]:
         """Find models by the given keyword arguments.
         :param kwargs: keyword arguments to filter the query by
         :return: a generator of models that match the keyword arguments
@@ -144,15 +143,16 @@ class Service(Generic[MT, ST]):
         self.db.delete(model)
         self.db.commit()
 
-    def update(self, id_: int, model: ST) -> ST:
+    def update(self, id_: int, model: MT) -> MT:
         """Update a model by its id.
         :param id_: the id of the model to update
         :param model: the model to update
         :return: the updated model
         """
         model = self.get_by_id(id_)
-        for key, value in model.dict(exclude_unset=True).items():
-            setattr(model, key, value)
+        for key, value in model.__dict__.items():
+            if key in model.__table__.columns.keys():
+                setattr(model, key, value)
         self.db.commit()
         self.db.refresh(model)
         return model
