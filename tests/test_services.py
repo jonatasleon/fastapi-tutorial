@@ -1,3 +1,4 @@
+"""Service test cases."""
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -7,7 +8,7 @@ from app.database import Base
 from app.services import Service, NotFoundError
 
 
-class DummyModel(Base):
+class DummyModel(Base): # pylint: disable=too-few-public-methods
     """Dummy model."""
 
     __tablename__ = "dummy"
@@ -25,9 +26,9 @@ class DummyService(Service[DummyModel]):
 def fixture_db():
     """Fixture for a database session."""
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
-    SessionLocal = sessionmaker(autocommit=False, autoflush=True, bind=engine)
+    session_local = sessionmaker(autocommit=False, autoflush=True, bind=engine)
 
-    session = SessionLocal()
+    session = session_local()
     Base.metadata.create_all(engine)
     yield session
     Base.metadata.drop_all(engine)
@@ -60,7 +61,7 @@ def test_dummy_service_save_model(service: DummyService):
     result = service.save(model)
     assert model.name == result.name, "The model name should be 'Dummy'"
     assert result.id is not None, "The model should have an id"
-    assert type(result.id) == int, "The id should be an integer"
+    assert isinstance(result.id, int), "The id should be an integer"
 
 
 def test_dummy_service_get_one_model(service: DummyService):
