@@ -1,4 +1,4 @@
 [MASTER]
 linelength = 100
 extension-pkg-whitelist = pydantic
-good-names = _, db, id, e
+good-names = _, db, id, e, i

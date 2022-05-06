@@ -5,11 +5,11 @@ from .. import models
 from .base import Service
 
 
-class ItemService(Service[models.Item]):
+class ItemService(Service[models.ItemModel]):
     """Item Service that inherits from :class:`Service` abstract class.
     This class is responsible for CRUD operations on :class:`app.models.Item`."""
 
-    __model__ = models.Item
+    __model__ = models.ItemModel
 
 
 class OwnedItemService(ItemService):
@@ -20,7 +20,7 @@ class OwnedItemService(ItemService):
     :param db: the database session
     :param owner: the owner of the items"""
 
-    def __init__(self, db: Session, owner: models.User):
+    def __init__(self, db: Session, owner: models.UserModel):
         """Initialize the service."""
         super().__init__(db)
         self.owner = owner

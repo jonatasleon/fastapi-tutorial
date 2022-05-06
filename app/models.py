@@ -1,11 +1,20 @@
+# pylint: disable=too-few-public-methods
 """Models."""
 from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-from .database import Base
+_Base = declarative_base()
 
 
-class User(Base):  # pylint: disable=too-few-public-methods
+class Base(_Base):
+    """Base model for all models."""
+
+    __abstract__ = True
+    id = Column(Integer, primary_key=True)
+
+
+class UserModel(Base):
     """User model."""
 
     __tablename__ = "users"
@@ -19,7 +28,7 @@ class User(Base):  # pylint: disable=too-few-public-methods
     items = relationship("Item", back_populates="owner")
 
 
-class Item(Base):  # pylint: disable=too-few-public-methods
+class ItemModel(Base):
     """Item model."""
 
     __tablename__ = "items"

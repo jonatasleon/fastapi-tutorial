@@ -3,7 +3,7 @@ from typing import AnyStr, Dict, Generator, Generic, Type, TypeVar, Union
 
 from sqlalchemy.orm import Query, Session
 
-from ..database import Base
+from app.models import Base
 
 MT = TypeVar("MT", bound=Base)
 
@@ -40,17 +40,19 @@ class Service(Generic[MT]):
     """
 
     __default_params__: Dict[str, Union[AnyStr, int, float, bool]] = {}
-    __model__: Type[MT] = None
+    __model__: Type[MT]
 
     def __init__(
         self, db: Session, *, default_params: Dict[str, Union[AnyStr, int, float, bool]] = None
     ):
         self.db: Session = db
-        if not self.__model__:
+        if not hasattr(self, "__model__"):
             raise NotImplementedError("__model__ attribute must be defined")
         self.model: Type[MT] = self.__model__
-        self.query = self.db.query(self.model)
-        self._default_params = (self.__default_params__ or {}).copy()
+        self.query: Query = self.db.query(self.model)
+        self._default_params: Dict[str, Union[AnyStr, int, float, bool]] = (
+            self.__default_params__ or {}
+        ).copy()
         self.update_default_params(**(default_params or {}))
 
     def update_default_params(self, **kwargs: Dict[str, Union[AnyStr, int, float, bool]]) -> None:
@@ -82,6 +84,15 @@ class Service(Generic[MT]):
         """Save the given model.
         :param model: the model to save
         :return: the saved model
+        """
+        if model.id is None:
+            return self.insert(model)
+        return self.update(model)
+
+    def insert(self, model: MT) -> MT:
+        """Insert a model.
+        :param model: the model to insert
+        :return: the inserted model
         """
         self.db.add(model)
         self.db.commit()
