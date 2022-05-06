@@ -1,4 +1,5 @@
 """User services."""
+from sqlalchemy.orm.session import make_transient
 from app import models, schemas
 
 from .base import Service
@@ -16,6 +17,35 @@ class UserService(Service[models.User]):
     """User base service."""
 
     __model__ = models.User
+
+    def save(self, model: models.User) -> models.User:
+        """Save a user.
+
+        :param model: the user to save
+        :raises EmailAlreadyRegistredError: if the user with the given email already exists
+        :return: the saved user
+        """
+        if self.has_email(model.email):
+            raise EmailAlreadyRegistredError(model.email)
+        return super().save(model)
+
+    def update(self, model: models.User) -> models.User:
+        """Update a user.
+
+        :param id_: the user id
+        :param model: the user to update
+        :raises NotFoundError: if the user with the given id does not exist
+        :raises EmailAlreadyRegistredError: if the user with the given email already exists
+        :return: the updated user
+        """
+        self.db.expunge(model)
+        make_transient(model)
+        if self.has_email(model.email):
+            other = self.get_by_email(model.email)
+            if other.id != model.id:
+                raise EmailAlreadyRegistredError(model.email)
+        return super().update(model)
+
 
     def get_by_email(self, email: str) -> schemas.User:
         """Get a user by email.

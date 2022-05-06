@@ -143,13 +143,13 @@ class Service(Generic[MT]):
         self.db.delete(model)
         self.db.commit()
 
-    def update(self, id_: int, model: MT) -> MT:
+    def update(self, model: MT) -> MT:
         """Update a model by its id.
         :param id_: the id of the model to update
         :param model: the model to update
         :return: the updated model
         """
-        model = self.get_by_id(id_)
+        model = self.get_by_id(model.id)
         for key, value in model.__dict__.items():
             if key in model.__table__.columns.keys():
                 setattr(model, key, value)
