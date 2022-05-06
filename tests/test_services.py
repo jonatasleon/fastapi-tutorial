@@ -1,14 +1,16 @@
 """Service test cases."""
+from sqlite3 import IntegrityError
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy import Column, Integer, String
 
 from app.database import Base
-from app.services import Service, NotFoundError
+from app.services.base import Service, NotFoundError
+from app.services.user import UserService, EmailAlreadyRegistredError
 
 
-class DummyModel(Base): # pylint: disable=too-few-public-methods
+class DummyModel(Base):  # pylint: disable=too-few-public-methods
     """Dummy model."""
 
     __tablename__ = "dummy"
@@ -26,7 +28,7 @@ class DummyService(Service[DummyModel]):
 def fixture_db():
     """Fixture for a database session."""
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
-    session_local = sessionmaker(autocommit=False, autoflush=True, bind=engine)
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
     session = session_local()
     Base.metadata.create_all(engine)
@@ -39,6 +41,13 @@ def fixture_db():
 def fixture_service(db):
     """Fixture for a service."""
     service = DummyService(db=db)
+    return service
+
+
+@pytest.fixture(name="user_service")
+def fixture_user_service(db):
+    """Fixture for a user service."""
+    service = UserService(db=db)
     return service
 
 
@@ -143,7 +152,7 @@ def test_dummy_service_update_model(service: DummyService):
     model = service.create_model(name="Dummy")
     service.save(model)
     model.name = "Dummy2"
-    service.update(model.id, model)
+    service.update(model)
     model = service.get_by_id(model.id)
     assert model.name == "Dummy2", "The model name should be 'Dummy2'"
 
@@ -151,8 +160,8 @@ def test_dummy_service_update_model(service: DummyService):
 def test_dummy_service_update_model_raises_not_found_error(service: DummyService):
     """Test that the UserService.update_model() method works."""
     with pytest.raises(NotFoundError):
-        model = service.create_model(name="Dummy")
-        service.update(1, model)
+        model = service.create_model(id=1, name="Dummy")
+        service.update(model)
 
 
 def test_dummy_service_default_params(service: DummyService):
@@ -177,3 +186,64 @@ def test_dummy_service_default_params_can_be_overriden(service: DummyService):
     model = service.create_model(name="Dummy2")
     service.save(model)
     assert model.name == "Dummy2", "The model name should be 'Dummy2'"
+
+
+def test_dummy_service_count_when_no_registries_were_inserted(service: DummyService):
+    """Test that Service.count() method works."""
+    assert service.count() == 0, "The count should be 0"
+
+
+def test_dummy_service_count_when_1_registry_was_inserted(service: DummyService):
+    """Test that the UserService.count() method works."""
+    model = service.create_model(name="Dummy")
+    service.save(model)
+    result = service.count()
+    assert result == 1, "The result should be 1"
+
+
+def test_dummy_service_count_when_100_registries_was_inserted(service: DummyService):
+    """Test that the UserService.count() method works."""
+    for i in range(100):
+        service.save(service.create_model(name=f"Dummy {i}"))
+    result = service.count()
+    assert result == 100, "The result should be 100"
+
+
+def test_EmailAlreadyRegistredError_message():
+    """Test that the EmailAlreadyRegisteredError has the correct message."""
+    with pytest.raises(EmailAlreadyRegistredError) as exec_info:
+        raise EmailAlreadyRegistredError("fake@mail.com")
+    assert (
+        exec_info.value.args[0] == "User with email fake@mail.com already exists."
+    ), "The message should be 'User with email fake@mail.com aleady exists.'"
+
+
+def test_user_service_create_an_already_registered_email(user_service: UserService):
+    """Test that the UserService.save() method works."""
+    user_service.save(user_service.create_model(name="Fake", email="fake@mail.com"))
+    with pytest.raises(EmailAlreadyRegistredError):
+        user_service.save(user_service.create_model(name="Fake2", email="fake@mail.com"))
+
+
+def test_user_service_update_with_an_different_and_already_registered_email(
+    user_service: UserService,
+):
+    """Test that the UserService.update() method works."""
+    user_service.save(user_service.create_model(name="Fake", email="fake@mail.com"))
+    user = user_service.save(user_service.create_model(name="Fake2", email="fake2@mail.com"))
+    user.email = "fake@mail.com"
+    with pytest.raises(EmailAlreadyRegistredError):
+        user_service.update(user)
+
+
+def test_user_service_update_with_same_email_and_same_id(user_service: UserService):
+    """Test that the UserService.update() method works."""
+    user = user_service.save(user_service.create_model(name="Fake", email="fake@mail.com"))
+    user.name = "New Fake"
+    user_service.update(user)
+
+
+def test_user_service_has_email(user_service: UserService):
+    """Test that the UserService.has_email() method works."""
+    user_service.save(user_service.create_model(name="Fake", email="fake@mail.com"))
+    assert user_service.has_email(email="fake@mail.com"), "The email should exist"
