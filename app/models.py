@@ -25,7 +25,7 @@ class UserModel(Base):
     password = Column(String)
     is_active = Column(Boolean, default=True)
 
-    items = relationship("Item", back_populates="owner")
+    items = relationship("ItemModel", back_populates="owner")
 
 
 class ItemModel(Base):
@@ -40,4 +40,4 @@ class ItemModel(Base):
     is_offer = Column(Boolean, default=False)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-    owner = relationship("User", back_populates="items")
+    owner = relationship("UserModel", back_populates="items")
