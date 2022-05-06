@@ -125,7 +125,7 @@ class Auth:
         :param user: the user to create.
         :return: the created user.
         """
-        if self.service.has_user(user.email):
+        if self.service.has_email(user.email):
             raise EmailAlreadyRegistredError(user.email)
 
         user.password = self._get_password_hash(user.password)

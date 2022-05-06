@@ -25,9 +25,9 @@ class UserService(Service[models.User]):
         """
         return self.get_one_or_raise(email=email)
 
-    def has_user(self, email: str) -> bool:
-        """Check if a user exists.
+    def has_email(self, email: str) -> bool:
+        """Check if a email exists.
         :param email: the email to check
-        :return: True if the user exists, False otherwise
+        :return: True if the email exists, False otherwise
         """
         return self.count(email=email) > 0
