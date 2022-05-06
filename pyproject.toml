@@ -6,7 +6,7 @@ authors = ["Jonatas Leon <j@jonatasleon.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = ">=3.8,<4.0"
 fastapi = "^0.75.2"
 SQLAlchemy = "^1.4.36"
 uvicorn = "^0.17.6"
@@ -20,6 +20,8 @@ pylint = "^2.13.7"
 isort = "^5.10.1"
 flake8 = "^4.0.1"
 pytest = "^7.1.2"
+pytest-cov = "^3.0.0"
+ipython = "^8.3.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -27,7 +29,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 100
-target-version = ['py37']
+target-version = ['py38']
 include = '\.pyi?$'
 
 [tool.isort]
