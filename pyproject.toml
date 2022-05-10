@@ -23,6 +23,7 @@ flake8 = "^4.0.1"
 pytest = "^7.1.2"
 pytest-cov = "^3.0.0"
 ipython = "^8.3.0"
+ipykernel = "^6.13.0"
 
 [tool.poetry.scripts]
 py_start = "app:__main__"
