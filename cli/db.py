@@ -1,9 +1,9 @@
 import os
 
+import IPython
 import typer
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-import IPython
 
 from app.models import Base
 from cli.commons import DEFAULT_DATABASE_URL

@@ -1,11 +1,13 @@
-import sys
 import subprocess
+import sys
 
 
 def format_files():
     GIT_LS_FILES_CMD = ["git", "ls-files", "*.py"]
     py_files = (
-        subprocess.run(GIT_LS_FILES_CMD, stdout=subprocess.PIPE).stdout.decode("utf-8").split("\n")[:-1]
+        subprocess.run(GIT_LS_FILES_CMD, stdout=subprocess.PIPE)
+        .stdout.decode("utf-8")
+        .split("\n")[:-1]
     )
     subprocess.run(
         [

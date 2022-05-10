@@ -1,4 +1,5 @@
 from unittest.mock import DEFAULT
+
 from app.settings import Settings
 
 settings = Settings()
