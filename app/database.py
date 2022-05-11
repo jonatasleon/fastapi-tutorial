@@ -1,26 +1,15 @@
 """Database module."""
-from typing import Generator
-
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./sql_app.db"
+from app.settings import Settings
+
+settings = Settings()
+
+SQLALCHEMY_DATABASE_URL = settings.database_url
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
     connect_args={"check_same_thread": False},
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-def get_db() -> Generator[Session, None, None]:
-    """Instantiate and return a new Session object.
-    Works as a context manager.
-
-    :return: a new Session object
-    """
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
