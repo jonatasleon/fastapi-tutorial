@@ -1,35 +1,62 @@
 import subprocess
 import sys
+from functools import lru_cache
 
 
-def format_files():
+@lru_cache
+def py_files():
+    """Return a list of all Python files under version control."""
     GIT_LS_FILES_CMD = ["git", "ls-files", "*.py"]
-    py_files = (
+    return (
         subprocess.run(GIT_LS_FILES_CMD, stdout=subprocess.PIPE)
         .stdout.decode("utf-8")
         .split("\n")[:-1]
     )
-    subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "black",
-        ]
-        + py_files,
-    )
-    subprocess.run([sys.executable, "-m", "isort"] + py_files)
 
 
-def lint_files():
-    GIT_LS_FILES_CMD = ["git", "ls-files", "*.py"]
-    py_files = (
-        subprocess.run(GIT_LS_FILES_CMD, stdout=subprocess.PIPE)
-        .stdout.decode("utf-8")
-        .split("\n")[:-1]
+def format_files(files, check=False):
+    CMD = [sys.executable, "-m", "black"]
+    if check:
+        CMD.extend(["--check", "--diff"])
+    CMD.extend(files)
+    return subprocess.run(CMD, capture_output=True)
+
+
+def format_imports(files, check=False):
+    CMD = [sys.executable, "-m", "isort", "-c", "-v"]
+    if check:
+        CMD.append("--check-only")
+    CMD.extend(files)
+    return subprocess.run(CMD, capture_output=True)
+
+
+def lint_files(files):
+    return (
+        subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "flake8",
+                "--count",
+                "--select=E9,F63,F7,F82",
+                "--show-source",
+                "--statistics",
+            ]
+            + files,
+            capture_output=True,
+        ),
+        subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "flake8",
+                "--count",
+                "--exit-zero",
+                "--max-complexity=10",
+                "--max-line-length=100",
+                "--statistics",
+            ]
+            + files,
+            capture_output=True,
+        ),
     )
-    subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "flake8",]+ py_files,
-        )
