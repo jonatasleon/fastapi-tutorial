@@ -17,7 +17,7 @@ def callback():
 
 
 @db_cli.command()
-def shell(path: str = DEFAULT_DATABASE_URL):
+def shell(path: str = typer.Argument(DEFAULT_DATABASE_URL, envvar="DATABASE_URL")):
     """Open a shell with the database session."""
     try:
         if not os.path.isfile(path):
@@ -46,7 +46,7 @@ def shell(path: str = DEFAULT_DATABASE_URL):
 
 
 @db_cli.command()
-def create(path: str = DEFAULT_DATABASE_URL):
+def create(path: str = typer.Argument(DEFAULT_DATABASE_URL, envvar="DATABASE_URL")):
     """Create the database.
     :param path: the path to the database
     """
@@ -62,7 +62,7 @@ def create(path: str = DEFAULT_DATABASE_URL):
 
 
 @db_cli.command()
-def drop(path: str = DEFAULT_DATABASE_URL):
+def drop(path: str = typer.Argument(DEFAULT_DATABASE_URL, envvar="DATABASE_URL")):
     """Drop database
 
     :param path: the path to the database, defaults to sql_app.db
