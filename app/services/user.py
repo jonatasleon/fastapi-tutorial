@@ -39,7 +39,7 @@ class UserService(Service[models.UserModel]):
         :raises EmailAlreadyRegistredError: if the user with the given email already exists
         :return: the updated user
         """
-        self.db.expunge(model)
+        self.session.expunge(model)
         make_transient(model)
         if self.has_email(model.email):
             other_id = self.get_by_email(model.email).id

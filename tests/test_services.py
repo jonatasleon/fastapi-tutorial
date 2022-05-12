@@ -23,8 +23,8 @@ class DummyService(Service[DummyModel]):
     __model__ = DummyModel
 
 
-@pytest.fixture(name="db")
-def fixture_db():
+@pytest.fixture(name="session")
+def fixture_session():
     """Fixture for a database session."""
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
     session_local = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -37,38 +37,38 @@ def fixture_db():
 
 
 @pytest.fixture(name="service")
-def fixture_service(db: Session):
+def fixture_service(session: Session):
     """Fixture for a service."""
-    service = DummyService(db=db)
+    service = DummyService(session=session)
     return service
 
 
 @pytest.fixture(name="user_service")
-def fixture_user_service(db: Session):
+def fixture_user_service(session: Session):
     """Fixture for a user service."""
-    service = UserService(db=db)
+    service = UserService(session=session)
     return service
 
 
 @pytest.fixture(name="item_service")
-def fixture_item_service(db: Session):
+def fixture_item_service(session: Session):
     """Fixture for an item service."""
-    service = ItemService(db=db)
+    service = ItemService(session=session)
     return service
 
 
 @pytest.fixture(name="owned_item_service")
-def fixture_owned_item_service(db: Session, user_service: UserService):
+def fixture_owned_item_service(session: Session, user_service: UserService):
     """Fixture for an owned item service."""
     user = user_service.insert(user_service.create_model(name="Dummy", email="dummy@mail.com"))
-    service = OwnedItemService(db=db, owner=user)
+    service = OwnedItemService(session=session, owner=user)
     return service
 
 
-def test_service_raises_not_implemented_error(db: Session):
+def test_service_raises_not_implemented_error(session: Session):
     """Test that the service raises a NotImplementedError."""
     with pytest.raises(NotImplementedError):
-        Service(db=db)
+        Service(session=session)
 
 
 def test_dummy_service_create_model(service: DummyService):

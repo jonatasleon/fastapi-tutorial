@@ -35,7 +35,7 @@ class Service(Generic[MT]):
         ...
     ```
 
-    :param db: the database session
+    :param session: the database session
     :param default_params: the default parameters to use when creating a model
     """
 
@@ -43,13 +43,13 @@ class Service(Generic[MT]):
     __model__: Type[MT]
 
     def __init__(
-        self, db: Session, *, default_params: Dict[str, Union[AnyStr, int, float, bool]] = None
+        self, session: Session, *, default_params: Dict[str, Union[AnyStr, int, float, bool]] = None
     ):
-        self.db: Session = db
+        self.session: Session = session
         if not hasattr(self, "__model__"):
             raise NotImplementedError("__model__ attribute must be defined")
         self.model: Type[MT] = self.__model__
-        self.query: Query = self.db.query(self.model)
+        self.query: Query = self.session.query(self.model)
         self._default_params: Dict[str, Union[AnyStr, int, float, bool]] = (
             self.__default_params__ or {}
         ).copy()
@@ -94,9 +94,9 @@ class Service(Generic[MT]):
         :param model: the model to insert
         :return: the inserted model
         """
-        self.db.add(model)
-        self.db.commit()
-        self.db.refresh(model)
+        self.session.add(model)
+        self.session.commit()
+        self.session.refresh(model)
         return model
 
     def get_one(self, **kwargs) -> Union[MT, None]:
@@ -151,8 +151,8 @@ class Service(Generic[MT]):
         :param kwargs: keyword arguments to filter the query by
         """
         model = self.get_by_id(id_)
-        self.db.delete(model)
-        self.db.commit()
+        self.session.delete(model)
+        self.session.commit()
 
     def update(self, model: MT) -> MT:
         """Update a model by its id.
@@ -164,6 +164,6 @@ class Service(Generic[MT]):
         for key, value in model.__dict__.items():
             if key in model.__table__.columns.keys():
                 setattr(model, key, value)
-        self.db.commit()
-        self.db.refresh(model)
+        self.session.commit()
+        self.session.refresh(model)
         return model

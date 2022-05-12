@@ -17,11 +17,11 @@ class OwnedItemService(ItemService):
     abstract class. It apply a scope to the items that can be
     retrieved or created by the current user.
 
-    :param db: the database session
+    :param session: the database session
     :param owner: the owner of the items"""
 
-    def __init__(self, db: Session, owner: models.UserModel):
+    def __init__(self, session: Session, owner: models.UserModel):
         """Initialize the service."""
-        super().__init__(db)
+        super().__init__(session)
         self.owner = owner
         self.update_default_params(owner_id=owner.id)
