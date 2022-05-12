@@ -76,6 +76,8 @@ def check(
 ):
     """Check the code"""
     kwargs = {"check": True, "files": files}
+    if state["verbose"]:
+        typer.echo(f"Files: {', '.join([str(f) for f in files])}")
     typer.echo("Checking code...", nl=False)
     results = ThreadPool().map(lambda fn: fn(**kwargs), [format_imports, format_files])
     if any([p.returncode for p in results]):
