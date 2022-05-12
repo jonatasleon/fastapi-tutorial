@@ -23,7 +23,7 @@ def format_files(files, check=False):
 
 
 def format_imports(files, check=False):
-    CMD = [sys.executable, "-m", "isort", "-c", "-v"]
+    CMD = [sys.executable, "-m", "isort", "-v"]
     if check:
         CMD.append("--check-only")
     CMD.extend(files)
