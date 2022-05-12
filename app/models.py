@@ -11,7 +11,7 @@ class Base(_Base):
     """Base model for all models."""
 
     __abstract__ = True
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, index=True)
 
 
 class UserModel(Base):
@@ -19,7 +19,6 @@ class UserModel(Base):
 
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True)
     password = Column(String)
@@ -33,7 +32,6 @@ class ItemModel(Base):
 
     __tablename__ = "items"
 
-    id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     description = Column(String)
     price = Column(Float, nullable=False)
