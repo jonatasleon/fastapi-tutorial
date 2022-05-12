@@ -1,11 +1,12 @@
 """Test command line interface."""
+import os
 from tempfile import NamedTemporaryFile
 
 import pytest
 from typer.testing import CliRunner
 
 from cli.main import app
-from cli.source import validate_files
+from cli.utils import py_files
 
 
 @pytest.fixture(name="runner")
@@ -116,10 +117,14 @@ def test_lint_works_with_valid_file(runner: CliRunner, valid_file):
     assert result.exit_code == 0
 
 
-def test_validate_files_returns_python_files_under_version_control():
-    files = validate_files(None)
-    assert len(files) > 0
-    assert all(file.endswith(".py") for file in files)
+def test_validate_files_returns_python_files_under_version_control(
+    monkeypatch: pytest.MonkeyPatch, runner: CliRunner, valid_file
+):
+    monkeypatch.setattr(__import__("cli.source", fromlist=[None]), "py_files", lambda: [valid_file])
+    result = runner.invoke(app, ["source", "--verbose", "check"])
+    assert result.exit_code == 0
+    assert f"Files: {valid_file}" in result.output
+    assert "Checking code... done." in result.output
 
 
 def test_cli_db_create_works(runner: CliRunner):
@@ -147,3 +152,42 @@ def test_cli_db_drop_fails_when_db_does_not_exist(runner: CliRunner):
     runner.env["DATABASE_URL"] = "non_existing_file.db"
     result = runner.invoke(app, ["db", "drop"])
     assert result.exit_code == 1
+
+
+def test_cli_db_shell_works(monkeypatch: pytest.MonkeyPatch, runner: CliRunner):
+    def mock_embed(**kwargs):
+        assert "user_ns" in kwargs, "Embed shell was not called with user_ns"
+        assert "header" in kwargs, "Embed shell was not called with header"
+        context = kwargs["user_ns"]
+        message_header = kwargs["header"]
+        assert "session" in context, "Session was not provided to embed shell"
+        assert "services" in context, "Services were not provided to embed shell"
+        assert "models" in context, "Models were not provided to embed shell"
+        assert message_header == "Context: models, services, session\n", "Unexpected message header"
+        return None
+
+    monkeypatch.setattr(__import__("IPython"), "embed", mock_embed)
+
+    with NamedTemporaryFile(mode="wb+", dir="/tmp", suffix=".db") as f:
+        runner.env["DATABASE_URL"] = f.name
+        result = runner.invoke(app, ["db", "shell"])
+        assert result.exit_code == 0, "Expected 0 exit code"
+
+
+def test_cli_db_shell_fails_when_db_does_not_exist(runner: CliRunner):
+    runner.env["DATABASE_URL"] = "non_existing_file.db"
+    result = runner.invoke(app, ["db", "shell"])
+    assert (
+        result.output
+        == "Failed to open shell: non_existing_file.db does not exist or is not a file\n"
+    )
+    assert result.exit_code == 1, "Expected 1 exit code"
+
+
+def test_py_files_must_return_a_list_of_files():
+    files = py_files()
+    assert isinstance(files, list), "py_files must return a list"
+    assert all(isinstance(f, str) for f in files), "py_files must return a list of strings"
+    assert len(files) > 0, "py_files must return a list with at least one file"
+    assert all(os.path.isfile(f) for f in files), "py_files must return a list of existing files"
+    assert all(f.endswith(".py") for f in files), "py_files must return a list of python files"
