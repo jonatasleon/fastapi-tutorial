@@ -120,16 +120,18 @@ class Auth:
         """
         return self.pwd_ctx.hash(password)
 
-    def create_user(self, user: UserCreate) -> User:
+    def create_user(self, name: str, email: str, password: str) -> User:
         """Create a new user.
         :param user: the user to create.
         :return: the created user.
         """
-        if self.service.has_email(user.email):
-            raise EmailAlreadyRegistredError(user.email)
+        if self.service.has_email(email):
+            raise EmailAlreadyRegistredError(email)
 
-        user.password = self._get_password_hash(user.password)
-        return self.service.save(user)
+        password = self._get_password_hash(password)
+        return self.service.save(
+            self.service.create_model(name=name, email=email, password=password)
+        )
 
     def authenticate(self, form_data: OAuth2PasswordRequestForm) -> Union[User, None]:
         """Authenticate a user.
