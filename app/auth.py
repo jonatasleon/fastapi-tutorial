@@ -7,8 +7,8 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt
 from passlib.context import CryptContext
 
-from .schemas import Token, TokenData, User, UserCreate
-from .services import EmailAlreadyRegistredError, NotFoundError, UserService
+from app.schemas import Token, TokenData, User, UserCreate
+from app.services import EmailAlreadyRegistredError, NotFoundError, UserService
 
 SECRET_KEY = "d97c3cdfff3479ed1587a4143ad5b925ae4109fd59a7a74cddb505489b35102f"
 ALGORITHM = "HS256"

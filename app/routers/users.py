@@ -1,8 +1,8 @@
 """Users router."""
 from fastapi import APIRouter, Depends
 
-from .. import schemas
-from .commons import get_current_user
+from app import schemas
+from app.dependencies import get_current_user
 
 router = APIRouter(prefix="/users", tags=["users"])
 

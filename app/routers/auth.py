@@ -2,10 +2,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from .. import schemas
-from ..auth import Auth, CredentialsException, create_access_token
-from ..services import EmailAlreadyRegistredError
-from .commons import get_auth
+from app.auth import Auth, CredentialsException, create_access_token
+from app.dependencies import get_auth
+from app.schemas import Token, User, UserCreate, UserShow
+from app.services import EmailAlreadyRegistredError
 
 router = APIRouter(tags=["auth"])
 
@@ -13,12 +13,12 @@ router = APIRouter(tags=["auth"])
 @router.post(
     "/signup",
     status_code=status.HTTP_201_CREATED,
-    response_model=schemas.User,
+    response_model=User,
 )
-async def create_user(user: schemas.UserCreate, auth: Auth = Depends(get_auth)):
+async def create_user(user: UserCreate, auth: Auth = Depends(get_auth)):
     """Create a new user."""
     try:
-        return auth.create_user(user)
+        return auth.create_user(**user.dict())
     except EmailAlreadyRegistredError as e:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -26,7 +26,7 @@ async def create_user(user: schemas.UserCreate, auth: Auth = Depends(get_auth)):
         ) from e
 
 
-@router.post("/token", response_model=schemas.Token)
+@router.post("/token", response_model=Token)
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     auth: Auth = Depends(get_auth),

@@ -1,8 +1,8 @@
 """Item services."""
 from sqlalchemy.orm import Session
 
-from .. import models
-from .base import Service
+from app import models
+from app.services.base import Service
 
 
 class ItemService(Service[models.ItemModel]):
