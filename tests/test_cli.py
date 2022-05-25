@@ -62,12 +62,14 @@ def fixture_invalid_imports_file():
 
 
 def test_cli_help(runner: CliRunner):
+    """Test CLI help."""
     result = runner.invoke(app, ["--help"])
     assert result.exit_code == 0
     assert "Awesome CLI tool." in result.output
 
 
 def test_cli_format_works_with_valid_file(runner: CliRunner, valid_file):
+    """Test CLI format."""
     result = runner.invoke(app, ["source", "format", valid_file])
     assert "Formatting code... done." in result.output, "Unexpected message"
     assert "Formatting imports... done." in result.output, "Unexpected message"
@@ -75,12 +77,14 @@ def test_cli_format_works_with_valid_file(runner: CliRunner, valid_file):
 
 
 def test_cli_verbose_works(runner: CliRunner, valid_file):
+    """Test CLI verbose."""
     result = runner.invoke(app, ["source", "--verbose", "format", valid_file])
     assert "All done!" in result.output
     assert result.exit_code == 0
 
 
 def test_cli_format_works_with_need_fix_file(runner: CliRunner, need_fix_file):
+    """Test CLI format."""
     result = runner.invoke(app, ["source", "format", need_fix_file])
     assert "Formatting code... done." in result.output, "Unexpected message"
     assert "Formatting imports... done." in result.output, "Unexpected message"
@@ -88,30 +92,35 @@ def test_cli_format_works_with_need_fix_file(runner: CliRunner, need_fix_file):
 
 
 def test_cli_format_exits_1_with_invalid_format_file(runner: CliRunner, invalid_format_file):
+    """Test CLI format."""
     result = runner.invoke(app, ["source", "format", invalid_format_file])
     assert "Formatting code... error." in result.output, "Unexpected message"
     assert result.exit_code == 1, "Expected 0 exit code"
 
 
 def test_cli_check_works_with_valid_file(runner: CliRunner, valid_file):
+    """Test CLI check."""
     result = runner.invoke(app, ["source", "check", valid_file])
     assert "Checking code... done." in result.output
     assert result.exit_code == 0
 
 
 def test_exit_1_when_file_does_not_exist(runner: CliRunner):
+    """Test CLI format."""
     result = runner.invoke(app, ["source", "check", "not_existing_file"])
     assert result.output == "File(s) not found: not_existing_file\n"
     assert result.exit_code == 1
 
 
 def test_cli_check_fails_with_invalid_imports_file(runner: CliRunner, invalid_format_file):
+    """Test CLI check."""
     result = runner.invoke(app, ["source", "check", invalid_format_file])
     assert "Checking code... error." in result.output
     assert result.exit_code == 1
 
 
 def test_lint_works_with_valid_file(runner: CliRunner, valid_file):
+    """Test CLI lint."""
     result = runner.invoke(app, ["source", "lint", valid_file])
     assert "Linting code... done." in result.output
     assert result.exit_code == 0
@@ -120,6 +129,7 @@ def test_lint_works_with_valid_file(runner: CliRunner, valid_file):
 def test_validate_files_returns_python_files_under_version_control(
     monkeypatch: pytest.MonkeyPatch, runner: CliRunner, valid_file
 ):
+    """Test CLI db create."""
     monkeypatch.setattr(__import__("cli.source", fromlist=[None]), "py_files", lambda: [valid_file])
     result = runner.invoke(app, ["source", "--verbose", "check"])
     assert result.exit_code == 0
@@ -128,6 +138,7 @@ def test_validate_files_returns_python_files_under_version_control(
 
 
 def test_cli_db_create_works(runner: CliRunner):
+    """Test CLI db create."""
     with NamedTemporaryFile(mode="wb+", dir="/tmp", suffix=".db") as f:
         runner.env["DATABASE_URL"] = f.name
         result = runner.invoke(app, ["db", "create"])
@@ -135,12 +146,14 @@ def test_cli_db_create_works(runner: CliRunner):
 
 
 def test_cli_db_create_fails_with_invalid_db_url(runner: CliRunner):
+    """Test CLI db create."""
     runner.env["DATABASE_URL"] = "///:invalid:///"
     result = runner.invoke(app, ["db", "create"])
     assert result.exit_code == 1
 
 
 def test_cli_db_drop_works(runner: CliRunner):
+    """Test CLI db drop."""
     with NamedTemporaryFile(mode="wb+", dir="/tmp", suffix=".db") as f:
         runner.env["DATABASE_URL"] = f.name
         runner.invoke(app, ["db", "create"])
@@ -149,12 +162,15 @@ def test_cli_db_drop_works(runner: CliRunner):
 
 
 def test_cli_db_drop_fails_when_db_does_not_exist(runner: CliRunner):
+    """Test CLI db drop."""
     runner.env["DATABASE_URL"] = "non_existing_file.db"
     result = runner.invoke(app, ["db", "drop"])
     assert result.exit_code == 1
 
 
 def test_cli_db_shell_works(monkeypatch: pytest.MonkeyPatch, runner: CliRunner):
+    """Test CLI db shell."""
+
     def mock_embed(**kwargs):
         assert "user_ns" in kwargs, "Embed shell was not called with user_ns"
         assert "header" in kwargs, "Embed shell was not called with header"
@@ -175,6 +191,7 @@ def test_cli_db_shell_works(monkeypatch: pytest.MonkeyPatch, runner: CliRunner):
 
 
 def test_cli_db_shell_fails_when_db_does_not_exist(runner: CliRunner):
+    """Test CLI db shell."""
     runner.env["DATABASE_URL"] = "non_existing_file.db"
     result = runner.invoke(app, ["db", "shell"])
     assert (
@@ -185,6 +202,7 @@ def test_cli_db_shell_fails_when_db_does_not_exist(runner: CliRunner):
 
 
 def test_py_files_must_return_a_list_of_files():
+    """Test py_files must return a list of files."""
     files = py_files()
     assert isinstance(files, list), "py_files must return a list"
     assert all(isinstance(f, str) for f in files), "py_files must return a list of strings"
